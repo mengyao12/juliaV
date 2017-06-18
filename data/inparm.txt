@@ -1,7 +1,7 @@
 TT_PATH
-/Users/admin/tomo2Dcode/juliaV/data/a_fd.tt
+/Users/admin/tomo2Dcode/juliaV/data/yumen_rep20ms.tt
 INI_PATH
-/Users/admin/tomo2Dcode/juliaV/data/a_ini.mdl
+/Users/admin/tomo2Dcode/juliaV/data/yumen_ini.mdl
 OUT_PATH
 /Users/admin/tomo2Dcode/juliaV/data/a/
 MAX_ITERATION_LC
