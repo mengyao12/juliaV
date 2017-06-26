@@ -16,7 +16,7 @@ function readmdl(mdlpth::AbstractString)
     for j in 1:mz
     if typeof(mdlm[i,j]) != SubString{String}
       cnt = cnt+1;
-      slw[cnt] = mdlm[i,j];
+      slw[cnt] = 1.0/mdlm[i,j];
     end
     end
   end
