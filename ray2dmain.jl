@@ -38,4 +38,4 @@ sx,slw);
 
 # 2-D raytracing based on graph method
 nmele,idele,ipath,idone,tt,i1st,ndid,iss,i,j = graphray(nx,nz,nm,slw,izdn,itop,ixr1,
-ixr2,ns,dx,imax,x0,z0,sx,sz,nxz);
+ixr2,ns,dx,imax,x0,z0,sx,sz,nxz,sqr2,sqr5,sqr10,sqr13,sqr17,a4,c);

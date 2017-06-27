@@ -12,6 +12,7 @@ export readparm,
        washtomo,
        washnm,
        timsor,
+       update,
        graphray
 
 
@@ -29,4 +30,5 @@ include("slwminmax.jl")
 include("washtomo.jl")
 include("washnm.jl")
 include("timsor.jl")
+include("update.jl")
 include("graphray.jl")
