@@ -96,8 +96,8 @@ function iniray(nr::Array{Int64,1},ns::Int64,nx::Int64,nz::Int64,
 
   xx1 = 1.0e18;
   xx2 = -1.0e18;
-  ixr1 = zeros(Float64,ns);
-  ixr2 =zeros(Float64,ns);
+  ixr1 = zeros(Int64,ns);
+  ixr2 =zeros(Int64,ns);
 
   for is in 1:ns
 #    xx1 = 1.0e18;            # !! notice here, we'll see the effects in the future
@@ -115,7 +115,7 @@ function iniray(nr::Array{Int64,1},ns::Int64,nx::Int64,nz::Int64,
 
   # remove air velocity if any for refraction case
 
-  air = 340.0;
+  air = 1.0/340.0;
   for i in 1:nx
     for j = 1:nz
       ii = i + (j - 1) * nx;

@@ -1,7 +1,5 @@
 function slwbtm(nx::Int64,nz::Int64,slw::Array{Float64,1},izdn::Int64,nm::Int64)
 
-  # find the highest velocity vertically
-
   ibt = zeros(Int64,nx);
   for i in 1:nx
     s0 = slw[i+izdn*nx];
@@ -14,6 +12,6 @@ function slwbtm(nx::Int64,nz::Int64,slw::Array{Float64,1},izdn::Int64,nm::Int64)
       end
     end
   end
-      
+
   return ibt
 end

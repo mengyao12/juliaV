@@ -84,6 +84,7 @@ function mktop(nx::Int64,nz::Int64,x0::Float64,z0::Float64,dx::Float64,
   end
 
   # check topography depth
+  
   for i in 1:nx
     itop[i] =Int64(floor((ztop[i] - z0) / dx +1));
     if itop[i] <= 1
