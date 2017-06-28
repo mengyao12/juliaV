@@ -3,7 +3,7 @@ function graphray(nx::Int64,nz::Int64,nm::Int64,slw::Array{Float64,1},
   ixr2::Array{Int64,1},ns::Int64,dx::Float64,imax::Int64,
   x0::Float64,z0::Float64,sx::Array{Float64,1},sz::Array{Float64,1},
   nxz::Int64,sqr2::Float64,sqr5::Float64,sqr10::Float64,sqr13::Float64,
-  sqr17::Float64,a4::Float64,c::Float64)
+  sqr17::Float64,a4::Float64,c::Array{Float64,1})
 
   # ensure the raytracing bottom area
   ibt = rfrbtm(nx,nz,nm,slw,izdn);
@@ -63,7 +63,7 @@ function graphray(nx::Int64,nz::Int64,nm::Int64,slw::Array{Float64,1},
         end
       end
       if i <= nx-1
-        node[3] = i + 1 + (j - 2) * nx;  # upper row 2 3rd node
+        nod[3] = i + 1 + (j - 2) * nx;  # upper row 2 3rd node
         if idone[nod[3]] != 1
           tt0 = sqr2 * slw[nod[2]] + tt[iss];
           tt,ipath,ndid,nmele,idele  = update(tt0,nod[1],tt,ipath,ndid,iss,tmin,
@@ -75,7 +75,7 @@ function graphray(nx::Int64,nz::Int64,nm::Int64,slw::Array{Float64,1},
     if i >= 2
       nod[4] = i - 1 + (j - 1) * nx;     # middle 1st node
       if idone[nod[4]] != 1
-        tt0 = dx * min((slw[nod[1]],slw[nod[4]])) + tt[iss];
+        tt0 = dx * min(slw[nod[1]],slw[nod[4]]) + tt[iss];
         tt,ipath,ndid,nmele,idele  = update(tt0,nod[1],tt,ipath,ndid,iss,tmin,
         nmele,idele);
       end
