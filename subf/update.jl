@@ -1,6 +1,11 @@
 function update(tt0::Float64,nd0::Int64,tt::Array{Float64,1},
   ipath::Array{Int64,1},ndid::Int64,iss::Int64,tmin::Float64,
+<<<<<<< HEAD
   nmele::Array{Int64,1},idele::Array{Int64,2})
+=======
+  nmele::Array{Int64,1},idele::Array{Int64,2},nm::Int64,imax::Int64,
+  nxz::Int64)
+>>>>>>> master
 
   if tt0 < tt[nd0]
     tt[nd0] = tt0;

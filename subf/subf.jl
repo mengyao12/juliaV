@@ -6,7 +6,14 @@ export readparm,
        mktop,
        inicon,
        iniray,
-       slwbtm
+       slwbtm,
+       rfrbtm,
+       slwminmax,
+       washtomo,
+       washnm,
+       timsor,
+       update,
+       graphray
 
 
 include("readparm.jl")
@@ -18,3 +25,10 @@ include("mktop.jl")
 include("inicon.jl")
 include("iniray.jl")
 include("slwbtm.jl")
+include("rfrbtm.jl")
+include("slwminmax.jl")
+include("washtomo.jl")
+include("washnm.jl")
+include("timsor.jl")
+include("update.jl")
+include("graphray.jl")
