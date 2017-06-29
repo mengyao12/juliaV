@@ -26,7 +26,6 @@ function graphray(nx::Int64,nz::Int64,nm::Int64,slw::Array{Float64,1},
   iss = Int64;
   tt0 = Float64;
 
-
   for ii in 1:nm
     idone[ii] = 1;
   end
@@ -43,76 +42,141 @@ function graphray(nx::Int64,nz::Int64,nm::Int64,slw::Array{Float64,1},
     nmele,idele,nm,ipath,slw,idone,tt);
 
     # order 2, 8 nodes
-    indcn[iss] = 1;
+@label order
+      indcn[iss] = 1;
 
-    if j >= 2
-      if i >= 2
-        nod[1] = i - 1 + (j - 2) * nx;   # upper row 2 1st node
-        if idone[nod[1]] != 1
-          tt0 = sqr2 * slw[nod[1]] + tt[iss];
-          tt,ipath,ndid,nmele,idele  = update(tt0,nod[1],tt,ipath,ndid,iss,tmin,
-          nmele,idele);
+      if j >= 2
+        if i >= 2
+          nod[1] = i - 1 + (j - 2) * nx;   # upper row 2 1st node
+          if idone[nod[1]] != 1
+            tt0 = sqr2 * slw[nod[1]] + tt[iss];
+            tt,ipath,ndid,nmele,idele  = update(tt0,nod[1],tt,ipath,ndid,iss,tmin,
+            nmele,idele);
+          end
+        end
+        if i >= 2 && i <= nx-1
+          nod[2] = i + 0 + (j - 2) * nx;  # upper row 2 2nd node
+          if idone[nod[2]] != 1
+            tt0 = dx * (min(slw[nod[1]],slw[nod[2]])) + tt[iss];
+            tt,ipath,ndid,nmele,idele  = update(tt0,nod[2],tt,ipath,ndid,iss,tmin,
+            nmele,idele);
+          end
+        end
+        if i <= nx-1
+          nod[3] = i + 1 + (j - 2) * nx;  # upper row 2 3rd node
+          if idone[nod[3]] != 1
+            tt0 = sqr2 * slw[nod[2]] + tt[iss];
+            tt,ipath,ndid,nmele,idele  = update(tt0,nod[3],tt,ipath,ndid,iss,tmin,
+            nmele,idele);
+          end
         end
       end
-      if i >= 2 && i <= nx-1
-        nod[2] = i + 0 + (j - 2) * nx;  # upper row 2 2nd node
-        if idone[nod[2]] != 1
-          tt0 = dx * (min(slw[nod[1]],slw[nod[2]])) + tt[iss];
-          tt,ipath,ndid,nmele,idele  = update(tt0,nod[1],tt,ipath,ndid,iss,tmin,
+
+      if i >= 2
+        nod[4] = i - 1 + (j - 1) * nx;     # middle 1st node
+        if idone[nod[4]] != 1
+          tt0 = dx * min(slw[nod[1]],slw[nod[4]]) + tt[iss];
+          tt,ipath,ndid,nmele,idele  = update(tt0,nod[4],tt,ipath,ndid,iss,tmin,
           nmele,idele);
         end
       end
       if i <= nx-1
-        nod[3] = i + 1 + (j - 2) * nx;  # upper row 2 3rd node
-        if idone[nod[3]] != 1
-          tt0 = sqr2 * slw[nod[2]] + tt[iss];
-          tt,ipath,ndid,nmele,idele  = update(tt0,nod[1],tt,ipath,ndid,iss,tmin,
+        nod[5] = i + 1 + (j - 1) * nx;    # middle 2nd node
+        if idone[nod[5]] != 1
+          tt0 = dx * (min(slw[nod[2]],slw[iss])) + tt[iss];
+          tt,ipath,ndid,nmele,idele  = update(tt0,nod[5],tt,ipath,ndid,iss,tmin,
           nmele,idele);
         end
+      end
+
+      if j <= nz-1
+
+        if i >= 2
+          nod[6] = i - 1 + (j + 0) * nx;   # lower row 2 1st node
+          if idone[nod[6]] != 1
+            tt0 = sqr2 * slw[nod[4]] + tt[iss];
+            tt,ipath,ndid,nmele,idele  = update(tt0,nod[6],tt,ipath,ndid,iss,tmin,
+            nmele,idele);
+          end
+        end
+        nod[7] = i + 0 + (j + 0) * nx;    # lower row 2 2nd node
+        if idone[nod[7]] != 1
+          tt0 = dx * (min(slw[nod[4]],slw[iss])) + tt[iss];
+          tt,ipath,ndid,nmele,idele  = update(tt0,nod[7],tt,ipath,ndid,iss,tmin,
+        nmele,idele);
+        end
+        if i <= nx-1
+          nod[8] = i + 1 + (j + 0) * nx;   # lower row 2 3rd node
+          if idone[nod[8]] != 1
+            tt0 = sqr2 * slw[iss] +tt[iss];
+            tt,ipath,ndid,nmele,idele  = update(tt0,nod[8],tt,ipath,ndid,iss,tmin,
+            nmele,idele);
+          end
+        end
+
+      end
+
+    # order 3, add another 8 nodes
+
+
+    # find the next
+    @label loop1
+    if nmele[i1st] == 0
+
+      for m in i1st+1: imax
+        if nmele[m] != 0
+          i1st = m;
+          @goto loop2
+        end
+      end
+
+      @goto ending
+
+    @label loop2
+      for mm in 1:nmele[i1st]
+        idone[idele[mm,i1st]] = 1;
+      end
+
+    end
+
+    @label loop3
+    iss = idele[nmele[i1st],i1st];
+    nmele[i1st] = nmele[i1st] - 1;
+    ndid = ndid - 1;
+
+    if indcn[iss] == 1
+      if nmele[i1st] > 0
+        @goto loop3
+      end
+      if nmele[i1st] == 0
+        @goto loop1
       end
     end
 
-    if i >= 2
-      nod[4] = i - 1 + (j - 1) * nx;     # middle 1st node
-      if idone[nod[4]] != 1
-        tt0 = dx * min(slw[nod[1]],slw[nod[4]]) + tt[iss];
-        tt,ipath,ndid,nmele,idele  = update(tt0,nod[1],tt,ipath,ndid,iss,tmin,
-        nmele,idele);
-      end
+    if ndid == 0
+      @goto ending
     end
-    if i <= nx-1
-      nod[5] = i + 1 + (j - 1) * nx;    # middle 2nd node
-      if idone[nod[5]] != 1
-        tt0 = dx * (min(slw[nod[2]],slw[iss])) + tt[iss];
-        tt,ipath,ndid,nmele,idele  = update(tt0,nod[1],tt,ipath,ndid,iss,tmin,
-        nmele,idele);
-      end
-    end
+    i,j = denum(iss,i,j,nx,nz);
 
-    if j <= nz-1
-      if i >= 2
-        nod[6] = i - 1 + (j + 0) * nx;   # lower row 2 1st node
-        if idone[nod[6]] != 1
-          tt0 = sqr2 * slw[nod[4]] + tt[iss];
-          tt,ipath,ndid,nmele,idele  = update(tt0,nod[1],tt,ipath,ndid,iss,tmin,
-          nmele,idele);
-        end
-      end
-      nod[7] = i + 0 + (j + 0) * nx;    # lower row 2 2nd node
-      if idone[nod[7]] != 1
-        tt0 = dx * (min(slw[nod[4]],slw[iss])) + tt[iss];
-        tt,ipath,ndid,nmele,idele  = update(tt0,nod[1],tt,ipath,ndid,iss,tmin,
-        nmele,idele);
-      end
-      if i <= nx-1
-        nod[8] = i + 1 + (j + 0) * nx;   # lower row 2 3rd node
-        if idone[nod[8]] != 1
-          tt0 = sqr2 * slw[iss] +tt[iss];
-          tt,ipath,ndid,nmele,idele  = update(tt0,nod[1],tt,ipath,ndid,iss,tmin,
-          nmele,idele);
-        end
-      end
-    end
+    @goto order
+
+    @label ending
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
