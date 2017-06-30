@@ -3,7 +3,8 @@ function graphray(nx::Int64,nz::Int64,nm::Int64,slw::Array{Float64,1},
   ixr2::Array{Int64,1},ns::Int64,dx::Float64,imax::Int64,
   x0::Float64,z0::Float64,sx::Array{Float64,1},sz::Array{Float64,1},
   nxz::Int64,sqr2::Float64,sqr5::Float64,sqr10::Float64,sqr13::Float64,
-  sqr17::Float64,a4::Float64,c::Array{Float64,1})
+  sqr17::Float64,a4::Float64,c::Array{Float64,1},msmax::Int64,
+  nr::Array{Int64,1},rx::Array{Float64,2},rz::Array{Float64,2},mr::Int64)
 
   # ensure the raytracing bottom area
   ibt = rfrbtm(nx,nz,nm,slw,izdn);
@@ -25,6 +26,15 @@ function graphray(nx::Int64,nz::Int64,nm::Int64,slw::Array{Float64,1},
   j = Int64;
   iss = Int64;
   tt0 = Float64;
+  iirp = Int64;
+  iirc = Int64;
+  inod = Int64;
+  nd = zeros(Int64,6);
+  icnt = Int64;
+  ip = Int64;
+  ip = 1;
+  iasen = zeros(Int64,msmax*ns);
+  ttime = zeros(Float64,mr,ns)
 
   for ii in 1:nm
     idone[ii] = 1;
@@ -108,7 +118,7 @@ function graphray(nx::Int64,nz::Int64,nm::Int64,slw::Array{Float64,1},
         if i <= nx-1
           nod[8] = i + 1 + (j + 0) * nx;   # lower row 2 3rd node
           if idone[nod[8]] != 1
-            tt0 = sqr2 * slw[iss] +tt[iss];
+            tt0 = sqr2 * slw[iss] + tt[iss];
             tt,ipath,ndid,nmele,idele  = update(tt0,nod[8],tt,ipath,ndid,iss,tmin,
             nmele,idele);
           end
@@ -119,7 +129,7 @@ function graphray(nx::Int64,nz::Int64,nm::Int64,slw::Array{Float64,1},
     # order 3, add another 8 nodes
 
 
-    # find the next
+    # find the next 'source'
     @label loop1
     if nmele[i1st] == 0
 
@@ -130,11 +140,11 @@ function graphray(nx::Int64,nz::Int64,nm::Int64,slw::Array{Float64,1},
         end
       end
 
-      @goto ending
+      @goto sorend
 
     @label loop2
       for mm in 1:nmele[i1st]
-        idone[idele[mm,i1st]] = 1;
+        idone[idele[mm,i1st]] = 1;   # all selected to be sources
       end
 
     end
@@ -154,37 +164,45 @@ function graphray(nx::Int64,nz::Int64,nm::Int64,slw::Array{Float64,1},
     end
 
     if ndid == 0
-      @goto ending
+      @goto sorend
     end
-    i,j = denum(iss,i,j,nx,nz);
+    i,j = denum(iss,nx,nz);
 
-    @goto order
+    @goto order     # start the second time calculation
 
-    @label ending
+    @label sorend
+
+    # extract raypaths
+    for ir in 1: nr[is]
+
+      ix = Int64(floor((rx[ir,is] - x0) / dx + 1));
+      iz = Int64(floor((rz[ir,is] - z0) / dx + 1));
+      iirc = Int64(floor(ix + (iz - 1) * nx));
+      icnt = 0;
+    @label getsor
+      iirp = ipath[iirc];
+      if iirp == 0
+        @goto etrend
+      end
+      inod,nd = interp0(iirc,iirp,nd,dx,nx,nz);  # ??why array should be in, Int cannot
+      for k in 1:inod
+        icnt = icnt + 1;
+        iasen[ip+icnt] = nd[k];
+      end
+
+      iirc = iirp;
+      @goto getsor
+    @label etrend
+      iasen[ip] = icnt;
+      ip = ip + icnt + 1;
+    end
+
+    if ip > msmax*ns
+      msg = "ip > mamax in raytracing";  # add a return here
+    end
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    ttime = timrec(is,nr,nx,x0,z0,dx,rx,rz,tt,ttime);
 
 
 
@@ -193,5 +211,5 @@ function graphray(nx::Int64,nz::Int64,nm::Int64,slw::Array{Float64,1},
 
   end     # !! source loop end
 
-  return nmele,idele,ipath,idone,tt,i1st,ndid,iss,i,j
+  return tt,ttime
 end

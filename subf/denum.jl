@@ -1,4 +1,4 @@
-function denum(iss::Int64,i::Int64,j::Int64,nx::Int64,nz::Int64)
+function denum(iss::Int64,nx::Int64,nz::Int64)
 
   j = Int64(floor(iss / nx + 1));
   i = Int64(floor(iss - (j - 1) * nx));

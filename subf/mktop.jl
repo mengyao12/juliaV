@@ -21,9 +21,19 @@ function mktop(nx::Int64,nz::Int64,x0::Float64,z0::Float64,dx::Float64,
 
   for is in 1:ns
     for ir in 1:nr[is]
-      ii = Int64(floor((rx[ir,is] - x0) / dx +1));
+      ii = Int64(floor((rx[ir,is] - x0) / dx + 1));
       if rz[ir,is] < ztop[ii]
         ztop[ii] = rz[ir,is];
+      end
+    end
+  end
+
+  # ensure point next to receivers
+  for is in 1:ns
+    for ir in 1:nr[is]
+      ii = Int64(floor((rx[ir,is] - x0) / dx + 1));
+      if ztop[ii+1] > rz[ir,is]
+        ztop[ii+1] = rz[ir,is];
       end
     end
   end
@@ -84,7 +94,7 @@ function mktop(nx::Int64,nz::Int64,x0::Float64,z0::Float64,dx::Float64,
   end
 
   # check topography depth
-  
+
   for i in 1:nx
     itop[i] =Int64(floor((ztop[i] - z0) / dx +1));
     if itop[i] <= 1

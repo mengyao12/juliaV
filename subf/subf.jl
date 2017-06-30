@@ -14,6 +14,8 @@ export readparm,
        timsor,
        update,
        denum,
+       interp0,
+       timrec,
        graphray
 
 
@@ -33,4 +35,6 @@ include("washnm.jl")
 include("timsor.jl")
 include("update.jl")
 include("denum.jl")
+include("interp0.jl")
+include("timrec.jl")
 include("graphray.jl")
