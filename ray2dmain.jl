@@ -11,6 +11,7 @@ msmax = 80000;
 mm = mx * mz;
 imax = 4 * (mx + mz);
 mxz = 1.2 * (mx + 2 * mz);
+iorder = 5;
 
 # read the input parameters
 ttpth,mdlpth,outpth,maxitr,maxV,minV,tau,hvs = readparm(parmpath);
@@ -38,7 +39,7 @@ sx,slw);
 
 # 2-D raytracing based on graph method
 tt,ttime = graphray(nx,nz,nm,slw,izdn,itop,ixr1,ixr2,ns,dx,imax,x0,z0,sx,sz,
-nxz,sqr2,sqr5,sqr10,sqr13,sqr17,a4,c,msmax,nr,rx,rz,mr);
+nxz,sqr2,sqr5,sqr10,sqr13,sqr17,a4,c,msmax,nr,rx,rz,mr,iorder);
 
 #=
 for ii in 1:nx*nz
