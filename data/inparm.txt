@@ -1,7 +1,7 @@
 TT_PATH
-/Users/admin/tomo2Dcode/juliaV/data/iran_ttime.tt
+/Users/admin/tomo2Dcode/juliaV/data/a_fd.tt
 INI_PATH
-/Users/admin/tomo2Dcode/juliaV/data/iran.mdl
+/Users/admin/tomo2Dcode/juliaV/data/a.mdl
 OUT_PATH
 /Users/admin/tomo2Dcode/juliaV/data/a/
 MAX_ITERATION_LC

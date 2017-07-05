@@ -590,7 +590,8 @@ function graphray(nx::Int64,nz::Int64,nm::Int64,slw::Array{Float64,1},
     @label sorend
 
 
-    # extract raypaths，if no raypaths request, just skip this paragraph
+    #=
+    # related to inversion(raypaths), skip it for FD 
     for ir in 1: nr[is]
 
       ix = Int64(floor((rx[ir,is] - x0) / dx + 1));
@@ -618,6 +619,7 @@ function graphray(nx::Int64,nz::Int64,nm::Int64,slw::Array{Float64,1},
     if ip > msmax*ns
       msg = "ip > mamax in raytracing";  # add a return here
     end
+    =#
 
 
     # get the traveltime of each receiver
@@ -643,79 +645,7 @@ function graphray(nx::Int64,nz::Int64,nm::Int64,slw::Array{Float64,1},
     @label rayend
     end
 
-
-
-
-
-    #=
-    isx = Int64(floor((sx[is] - x0) / dx + 1));
-    isz = Int64(floor((sz[is] - z0) / dx + 1));
-
-    for ir in 1:nr[is]
-      i0 = Int64(floor((rx[ir,is] - x0) / dx + 1));
-      j0 = Int64(floor((rz[ir,is] - z0) / dx + 1));
-
-      if isx == i0 && isz == j0
-        @goto rayend
-      end
-
-      t0 = 1.0e18;
-      for i in i0:i0+1
-        for j in j0:j0+1
-          if tt[i+(j-1)*nx] < t0
-            t0 = tt[i+(j-1)*nx];
-            irx = i;
-            irz = j;
-          end
-        end
-      end
-
-      ij0 = irx + (irz - 1) * nx;
-      ipath,irx,irz = raysimp(ij0,irx,irz,ipath,nx,nz);
-    end
-
-    for ir in 1:nr[is]
-      k = 1;
-      i0 = Int64(floor((rx[ir,is] - x0) / dx + 1));
-      j0 = Int64(floor((rz[ir,is] - z0) / dx + 1));
-      t0 = 1.0e18;
-      for i in i0:i0+1
-        for j in j0:j0+1
-          if tt[i+(j-1)*nx] < t0
-            t0 = tt[i+(j-1)*nx];
-            ix = i;
-            iz = j;
-          end
-        end
-      end
-
-      j = ix + (iz - 1) * nx;
-    @label ray1
-    j = ipath[j];
-    k = k + 1;
-    if j == 0
-      @goto write1
-    end
-    jj1 = ipath[j];
-    if jj1 == 0
-      @goto write1
-    end
-    @goto ray1
-
-    @label write1
-    write
-    =#
-
-
-
-
-
   end     # !! source loop end
-
-
-
-
-
 
   return tt,ttime,ray
 end
