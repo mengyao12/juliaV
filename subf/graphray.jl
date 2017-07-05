@@ -5,7 +5,7 @@ function graphray(nx::Int64,nz::Int64,nm::Int64,slw::Array{Float64,1},
   nxz::Int64,sqr2::Float64,sqr5::Float64,sqr10::Float64,sqr13::Float64,
   sqr17::Float64,a4::Float64,c::Array{Float64,1},msmax::Int64,
   nr::Array{Int64,1},rx::Array{Float64,2},rz::Array{Float64,2},mr::Int64,
-  iorder::Int64)
+  iorder::Int64,ip::Int64)
 
   # ensure the raytracing bottom area
   ibt = rfrbtm(nx,nz,nm,slw,izdn);
@@ -32,16 +32,16 @@ function graphray(nx::Int64,nz::Int64,nm::Int64,slw::Array{Float64,1},
   inod = Int64;
   nd = zeros(Int64,6);
   icnt = Int64;
-  ip = Int64;
-  ip = 1;
   iasen = zeros(Int64,msmax*ns);
-  ttime = zeros(Float64,mr,ns)
+  ttime = zeros(Float64,mr,ns);
+  ray = zeros(Int64,nm);
+  ipass = Int64;
 
   for ii in 1:nm
     idone[ii] = 1;
   end
 
-  for is in 1:2   # !! source loop start
+  for is in 1:ns   # !! source loop start
     println(is)
 
     # initialize the grid for each source
@@ -142,7 +142,7 @@ function graphray(nx::Int64,nz::Int64,nm::Int64,slw::Array{Float64,1},
         end
       end
       if i <= nx-1
-        nod[10] = i + 1 + (j -3) * nx;    # upper row 2nd node
+        nod[10] = i + 1 + (j - 3) * nx;    # upper row 2nd node
         if idone[nod[10]] != 1
           tt0 = sqr5 * (slw[nod[2]-nx] + slw[nod[2]]) + tt[iss];
           tt,ipath,ndid,nmele,idele  = update(tt0,nod[10],tt,ipath,ndid,iss,tmin,
@@ -248,7 +248,7 @@ function graphray(nx::Int64,nz::Int64,nm::Int64,slw::Array{Float64,1},
       end
 
       if i <= nx-2 && j >= 4
-        nod[20] = i + 2 + (j-4) * nx;
+        nod[20] = i + 2 + (j - 4) * nx;
         if idone[nod[20]] != 1
           tt0 = sqr13 * (slw[nod[19]] + 0.5 * slw[nod[10]] + 0.5 * slw[nod[10]-1]
           + slw[nod[2]]) + tt[iss];
@@ -335,7 +335,7 @@ function graphray(nx::Int64,nz::Int64,nm::Int64,slw::Array{Float64,1},
       end
 
       if i >= 3 && j <= nz-3
-        nod[29] = i - 2 + (j + 2) * nx
+        nod[29] = i - 2 + (j + 2) * nx;
         if idone[nod[29]] != 1
           tt0 = sqr13 * (slw[nod[27]+1] + 0.5 * slw[nod[13]] + 0.5 * slw[nod[6]]
           + slw[nod[4]]) + tt[iss];
@@ -364,7 +364,7 @@ function graphray(nx::Int64,nz::Int64,nm::Int64,slw::Array{Float64,1},
       end
 
       if i <= nx-2 && j <= nz-3
-        nod[32] = i + 2 + (j + 2) * nx
+        nod[32] = i + 2 + (j + 2) * nx;
         if idone[nod[32]] != 1
           tt0 = sqr13 * (slw[iss] + 0.5 * slw[nod[7]] + 0.5 * slw[nod[8]] +
           slw[nod[16]]) + tt[iss];
@@ -373,28 +373,177 @@ function graphray(nx::Int64,nz::Int64,nm::Int64,slw::Array{Float64,1},
         end
       end
 
-    end     # order >=4
+    end     # iorder >=4
 
 
+    #=
+    # order 5, add another 16 nodes
+    if iorder == 5
 
+      if i >= 4 && j >= 5
+        nod[33] = i - 3 + (j - 5) * nx;
+        if idone[nod[33]] != 1
+          tt0 = a4 * (3.0 * slw[nod[33]] + slw[nod[17]-1] + 2.0 * slw[nod[17]]
+          + 2.0 * slw[nod[9]-1] + slw[nod[9]] + 3.0 * slw[nod[1]]) + tt[iss];
+          tt,ipath,ndid,nmele,idele  = update(tt0,nod[33],tt,ipath,ndid,iss,tmin,
+          nmele,idele);
+        end
+      end
 
+      if i >= 2 && j >= 5
+        nod[34] = i - 1 + (j - 5) * nx;
+        if idone[nod[34]] != 1
+          tt0 = sqr17 * (slw[nod[34]] + slw[nod[18]] + slw[nod[9]] +
+          slw[nod[1]]) + tt[iss];
+          tt,ipath,ndid,nmele,idele  = update(tt0,nod[34],tt,ipath,ndid,iss,tmin,
+          nmele,idele);
+        end
+      end
 
+      if i <= nx-1 && j >= 5
+        nod[35] = i + 1 + (j - 5) * nx;
+        if idone[nod[35]] != 1
+          tt0 = sqr17 * (slw[nod[35]-1] + slw[nod[19]-1] + slw[nod[10]-1] +
+          slw[nod[2]]) + tt[iss];
+          tt,ipath,ndid,nmele,idele  = update(tt0,nod[35],tt,ipath,ndid,iss,tmin,
+          nmele,idele);
+        end
+      end
 
+      if i <= nx-3 && j >= 5
+        nod[36] = i + 3 + (j - 5) * nx;
+        if idone[nod[36]] != 1
+          tt0 = a4 * (3.0 * slw[nod[36]-1] + slw[nod[20]] + 2.0 * slw[nod[19]]
+          + 2.0 * slw[nod[10]] + slw[nod[10]-1] + 3.0 * slw[nod[2]]) + tt[iss];
+          tt,ipath,ndid,nmele,idele  = update(tt0,nod[36],tt,ipath,ndid,iss,tmin,
+          nmele,idele);
+        end
+      end
 
+      if i >= 5 && j >= 4
+        nod[37] = i - 4 + (j - 4) * nx;
+        if idone[nod[37]] != 1
+          tt0 = a4 * (3.0 * slw[nod[37]] + slw[nod[37]+1] + 2.0 * slw[nod[21]]
+          + 2.0 * slw[nod[9]-1] + slw[nod[11]] + 3.0 * slw[nod[1]]) + tt[iss];
+          tt,ipath,ndid,nmele,idele  = update(tt0,nod[37],tt,ipath,ndid,iss,tmin,
+          nmele,idele);
+        end
+      end
 
+      if i <= nx-4 && j >= 4
+        nod[38] = i + 4 + (j - 4) * nx;
+        if idone[nod[38]] != 1
+          tt0 = a4 * (3.0 * slw[nod[38]-1] + slw[nod[20]] + 2.0 * slw[nod[22]-1]
+          + 2.0 * slw[nod[10]] + slw[nod[3]] + 3.0 * slw[nod[2]]) + tt[iss];
+          tt,ipath,ndid,nmele,idele  = update(tt0,nod[38],tt,ipath,ndid,iss,tmin,
+          nmele,idele);
+        end
+      end
 
+      if i >= 5 && j >= 2
+        nod[39] = i - 4 + (j - 2) * nx;
+        if idone[nod[39]] != 1
+          tt0 = sqr17 * (slw[nod[39]] + slw[nod[23]] + slw[nod[11]] +
+          slw[nod[1]]) + tt[iss];
+          tt,ipath,ndid,nmele,idele  = update(tt0,nod[39],tt,ipath,ndid,iss,tmin,
+          nmele,idele);
+        end
+      end
 
+      if i <= nx-4 && j >= 2
+        nod[40] = i + 4 + (j - 2) * nx;
+        if idone[nod[40]] != 1
+          tt0 = sqr17 * (slw[nod[24]] + slw[nod[12]] + slw[nod[3]] +
+          slw[nod[2]]) + tt[iss];
+          tt,ipath,ndid,nmele,idele  = update(tt0,nod[40],tt,ipath,ndid,iss,tmin,
+          nmele,idele);
+        end
+      end
 
+      if i >= 5 && j <= nz-1
+        nod[41] = i - 4 + (j + 0) * nx;
+        if idone[nod[41]] != 1
+          tt0 = sqr17 * (slw[nod[41]-nx] + slw[nod[25]-nx] + slw[nod[13]-1] +
+          slw[nod[4]]) + tt[iss];
+          tt,ipath,ndid,nmele,idele  = update(tt0,nod[41],tt,ipath,ndid,iss,tmin,
+          nmele,idele);
+        end
+      end
 
+      if i <= nx-4 && j <= nz-1
+        nod[42] = i + 4 + (j + 0) * nx
+        if idone[nod[42]] != 1
+          tt0 = sqr17 * (slw[nod[26]-nx] + slw[nod[14]-nx] + slw[nod[5]] +
+          slw[iss]) + tt[iss];
+          tt,ipath,ndid,nmele,idele  = update(tt0,nod[42],tt,ipath,ndid,iss,tmin,
+          nmele,idele);
+        end
+      end
 
+      if i >= 5 && j <= nz-3
+        nod[43] = i - 4 + (j + 2) * nx;
+        if idone[nod[43]] != 1
+          tt0 = a4 * (3.0 *slw[nod[43]-nx] + slw[nod[27]] + 2.0 * slw[nod[25]]
+          + 2.0 * slw[nod[13]] + slw[nod[13]-nx] + 3.0 * slw[nod[4]]) + tt[iss];
+          tt,ipath,ndid,nmele,idele  = update(tt0,nod[43],tt,ipath,ndid,iss,tmin,
+          nmele,idele);
+        end
+      end
 
+      if i <= nx-4 && j <= nz-3
+        nod[44] = i + 4 + (j + 2) * nx;
+        if idone[nod[44]] != 1
+          tt0 = a4 * (3.0 * slw[nod[28]] + slw[nod[28]-1] + 2.0 * slw[nod[14]] +
+          2.0 * slw[nod[8]] + slw[nod[5]] + 3.0 * slw[iss]) + tt[iss];
+          tt,ipath,ndid,nmele,idele  = update(tt0,nod[44],tt,ipath,ndid,iss,tmin,
+          nmele,idele);
+        end
+      end
 
+      if i >= 4 && j <= nz-4
+        nod[45] = i - 3 + (j + 3) * nx;
+        if idone[nod[45]] != 1
+          tt0 = a4 * (3.0 * slw[nod[45]-nx] + slw[nod[27]] + 2.0 * slw[nod[15]-1]
+          + 2.0 * slw[nod[13]] + slw[nod[6]] + 3.0 * slw[nod[4]]) +tt[iss];
+          tt,ipath,ndid,nmele,idele  = update(tt0,nod[45],tt,ipath,ndid,iss,tmin,
+          nmele,idele);
+        end
+      end
 
+      if i >= 2 && j <= nz-4
+        nod[46] = i - 1 + (j + 3) * nx;
+        println(nod[46])
+        if idone[nod[46]] != 1
+          tt0 = sqr17 * (slw[nod[30]] + slw[nod[15]] + slw[nod[6]] + slw[nod[4]])
+          + tt[iss];
+          println(tt0)
+          tt,ipath,ndid,nmele,idele  = update(tt0,nod[46],tt,ipath,ndid,iss,tmin,
+          nmele,idele);
+        end
+      end
 
+      if i <= nx-1 && j <= nz-4
+        nod[47] = i + 1 + (j + 3) * nx;
+        if idone[nod[47]] != 1
+          tt0 = sqr17 * (slw[nod[31]-1] + slw[nod[16]-1] + slw[nod[7]] +
+          slw[iss]) + tt[iss];
+          tt,ipath,ndid,nmele,idele  = update(tt0,nod[47],tt,ipath,ndid,iss,tmin,
+          nmele,idele);
+        end
+      end
 
+      if i <= nx-3 && j <= nz-4
+        nod[48] = i + 3 + (j + 3) * nx;
+        if idone[nod[48]] != 1
+          tt0 = a4 * (3.0 * slw[nod[32]] + slw[nod[32]-nx] + 2.0 * slw[nod[16]]
+          + 2.0 * slw[nod[8]] + slw[nod[7]] + 3.0 * slw[iss]) + tt[iss];
+          tt,ipath,ndid,nmele,idele  = update(tt0,nod[48],tt,ipath,ndid,iss,tmin,
+          nmele,idele);
+        end
+      end
 
-
-
+    end  # iorder >=5
+    =#
 
 
     # find the next 'source'
@@ -440,6 +589,7 @@ function graphray(nx::Int64,nz::Int64,nm::Int64,slw::Array{Float64,1},
 
     @label sorend
 
+
     # extract raypaths，if no raypaths request, just skip this paragraph
     for ir in 1: nr[is]
 
@@ -469,10 +619,103 @@ function graphray(nx::Int64,nz::Int64,nm::Int64,slw::Array{Float64,1},
       msg = "ip > mamax in raytracing";  # add a return here
     end
 
+
     # get the traveltime of each receiver
     ttime = timrec(is,nr,nx,x0,z0,dx,rx,rz,tt,ttime);
 
+    # get the raypaths
+    isx = Int64(floor((sx[is] - x0) / dx + 1));
+    isz = Int64(floor((sz[is] - z0) / dx + 1));
+    for ir in 1:nr[is]
+      i0 = Int64(floor((rx[ir,is] - x0) / dx + 1));
+      j0 = Int64(floor((rz[ir,is] - z0) / dx + 1));
+      if isx == i0 && isz == j0
+        @goto rayend
+      end
+      ij0 = i0 + (j0 - 1) * nx;
+    @label pathround
+      ipass = ipath[ij0];
+      if ipass != 0
+        ray[ipass] = ray[ipass] + 1;
+        ij0 = ipass;
+        @goto pathround
+      end
+    @label rayend
+    end
+
+
+
+
+
+    #=
+    isx = Int64(floor((sx[is] - x0) / dx + 1));
+    isz = Int64(floor((sz[is] - z0) / dx + 1));
+
+    for ir in 1:nr[is]
+      i0 = Int64(floor((rx[ir,is] - x0) / dx + 1));
+      j0 = Int64(floor((rz[ir,is] - z0) / dx + 1));
+
+      if isx == i0 && isz == j0
+        @goto rayend
+      end
+
+      t0 = 1.0e18;
+      for i in i0:i0+1
+        for j in j0:j0+1
+          if tt[i+(j-1)*nx] < t0
+            t0 = tt[i+(j-1)*nx];
+            irx = i;
+            irz = j;
+          end
+        end
+      end
+
+      ij0 = irx + (irz - 1) * nx;
+      ipath,irx,irz = raysimp(ij0,irx,irz,ipath,nx,nz);
+    end
+
+    for ir in 1:nr[is]
+      k = 1;
+      i0 = Int64(floor((rx[ir,is] - x0) / dx + 1));
+      j0 = Int64(floor((rz[ir,is] - z0) / dx + 1));
+      t0 = 1.0e18;
+      for i in i0:i0+1
+        for j in j0:j0+1
+          if tt[i+(j-1)*nx] < t0
+            t0 = tt[i+(j-1)*nx];
+            ix = i;
+            iz = j;
+          end
+        end
+      end
+
+      j = ix + (iz - 1) * nx;
+    @label ray1
+    j = ipath[j];
+    k = k + 1;
+    if j == 0
+      @goto write1
+    end
+    jj1 = ipath[j];
+    if jj1 == 0
+      @goto write1
+    end
+    @goto ray1
+
+    @label write1
+    write
+    =#
+
+
+
+
+
   end     # !! source loop end
 
-  return tt,ttime
+
+
+
+
+
+  return tt,ttime,ray
 end
